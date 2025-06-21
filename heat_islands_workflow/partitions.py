@@ -4,6 +4,8 @@ month_partitions = dg.StaticPartitionsDefinition(
     [f"{str(i).zfill(2)}" for i in range(1, 13)],
 )
 
+year_and_month_partitions = dg.StaticPartitionsDefinition([f"{year}_{str(month).zfill(2)}" for year in range(2024, 2026) for month in range(1, 13)])
+
 
 zone_partitions = dg.StaticPartitionsDefinition(
     [

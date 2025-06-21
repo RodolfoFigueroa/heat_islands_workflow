@@ -57,6 +57,8 @@ def pop_exposed(df: gpd.GeoDataFrame) -> pd.DataFrame:
 
     spline = make_smoothing_spline(x, cdf, lam=0.05)
     pdf = spline.derivative()(x)
+    pdf = np.clip(pdf, 0, None)
+    pdf /= pdf.sum()
 
     return (
         pd.DataFrame(zip(x, pdf, cdf, strict=False), columns=["temp", "pdf", "cdf"])

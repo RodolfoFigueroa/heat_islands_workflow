@@ -6,6 +6,7 @@ from heat_islands_workflow.assets.raster.common import fetch_raster
 from heat_islands_workflow.partitions import (
     month_partitions,
     state_partitions,
+    year_and_month_partitions,
     zone_partitions,
 )
 
@@ -18,7 +19,7 @@ def raster_temp_monthly_factory(
         key_prefix=f"raster_{suffix}",
         ins={"bounds": dg.AssetIn(["bounds", suffix])},
         partitions_def=dg.MultiPartitionsDefinition(
-            {"area": partitions_def, "month": month_partitions},
+            {"area": partitions_def, "year_and_month": year_and_month_partitions},
         ),
         io_manager_key="raster_io_manager",
         group_name=f"temp_raster_{suffix}",
@@ -26,7 +27,8 @@ def raster_temp_monthly_factory(
     def _asset(
         context: dg.AssetExecutionContext, bounds: dict[str, float],
     ) -> tuple[np.ndarray, str, Affine]:
-        _, month = context.partition_key.split("|")
+        _, year_and_month = context.partition_key.split("|")
+        year, month = year_and_month.split("_")
 
         data, crs, transform = fetch_raster(
             "http://localhost:8000/suhi/raster/monthly/temp",
@@ -35,7 +37,7 @@ def raster_temp_monthly_factory(
                 ymin=bounds["ymin"],
                 xmax=bounds["xmax"],
                 ymax=bounds["ymax"],
-                year=2024,
+                year=year,
                 month=month,
             ),
         )
