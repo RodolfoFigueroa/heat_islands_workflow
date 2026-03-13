@@ -9,12 +9,13 @@ import shapely
 from rasterio import DatasetBase
 
 import dagster as dg
-from heat_islands_workflow.partitions import zone_partitions
-from heat_islands_workflow.resources import PathResource
+from heat_islands_workflow.defs.partitions import zone_partitions
+from heat_islands_workflow.defs.resources import PathResource
 
 
 def overlay_geometries(
-    ds: DatasetBase, geometries: Sequence[shapely.Geometry],
+    ds: DatasetBase,
+    geometries: Sequence[shapely.Geometry],
 ) -> list[float]:
     temps = []
     for geom in geometries:
@@ -27,14 +28,17 @@ def overlay_geometries(
 @dg.asset(
     ins={
         "raster_path": dg.AssetIn(
-            ["raster_zone", "suhi"], input_manager_key="raster_path_io_manager",
+            ["raster_zone_download", "suhi"],
+            input_manager_key="raster_path_io_manager",
         ),
     },
     partitions_def=zone_partitions,
     io_manager_key="gpkg_io_manager",
 )
 def polygons_with_temp(
-    context: dg.AssetExecutionContext, path_resource: PathResource, raster_path: Path,
+    context: dg.AssetExecutionContext,
+    path_resource: PathResource,
+    raster_path: Path,
 ) -> gpd.GeoDataFrame:
     fpath = (
         Path(path_resource.population_grids_path)

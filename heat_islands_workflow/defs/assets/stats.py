@@ -8,12 +8,14 @@ import shapely
 from scipy.interpolate import make_smoothing_spline
 
 import dagster as dg
-from heat_islands_workflow.partitions import zone_partitions
-from heat_islands_workflow.resources import PathResource
+from heat_islands_workflow.defs.partitions import zone_partitions
+from heat_islands_workflow.defs.resources import PathResource
 
 
 def generate_circles(
-    center: tuple[float, float], circle_radius: float, max_radius: float,
+    center: tuple[float, float],
+    circle_radius: float,
+    max_radius: float,
 ) -> tuple[np.ndarray, list[shapely.geometry.Polygon]]:
     radii = np.arange(circle_radius, max_radius + circle_radius, circle_radius)
     circles = [
@@ -73,7 +75,7 @@ def pop_exposed(df: gpd.GeoDataFrame) -> pd.DataFrame:
 @dg.asset(
     ins={
         "df_pop": dg.AssetIn("polygons_with_temp"),
-        "bounds": dg.AssetIn(["bounds", "zone"]),
+        "bounds": dg.AssetIn(["bounds_zone", "ee"]),
     },
     partitions_def=zone_partitions,
     io_manager_key="csv_io_manager",
@@ -92,16 +94,16 @@ def radial_distribution(
 
     response = requests.get(
         "http://localhost:8000/suhi/data/radial",
-        params=dict(
-            xmin=bounds["xmin"],
-            ymin=bounds["ymin"],
-            xmax=bounds["xmax"],
-            ymax=bounds["ymax"],
-            year=2024,
-            season="Qall",
-            x=centroid.x,
-            y=centroid.y,
-        ),
+        params={
+            "xmin": bounds["xmin"],
+            "ymin": bounds["ymin"],
+            "xmax": bounds["xmax"],
+            "ymax": bounds["ymax"],
+            "year": 2024,
+            "season": "Qall",
+            "x": centroid.x,
+            "y": centroid.y,
+        },
         timeout=500,
     )
 
@@ -124,4 +126,6 @@ def radial_distribution(
     x = np.arange(radii_trimmed[0], radii_trimmed[-1], 100)
     y = spline(x)
 
-    return pd.DataFrame(zip(x, y, strict=False), columns=["radius", "pdf"]).set_index("radius")
+    return pd.DataFrame(zip(x, y, strict=False), columns=["radius", "pdf"]).set_index(
+        "radius",
+    )

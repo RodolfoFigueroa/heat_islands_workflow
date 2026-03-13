@@ -198,3 +198,4 @@ cython_debug/
 dagster/*
 !dagster/dagster.yaml
 *.tif
+fig/

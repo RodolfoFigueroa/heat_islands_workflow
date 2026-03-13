@@ -4,7 +4,27 @@ month_partitions = dg.StaticPartitionsDefinition(
     [f"{str(i).zfill(2)}" for i in range(1, 13)],
 )
 
-year_and_month_partitions = dg.StaticPartitionsDefinition([f"{year}_{str(month).zfill(2)}" for year in range(2024, 2026) for month in range(1, 13)])
+year_partitions = dg.StaticPartitionsDefinition(["2024", "2025"])
+
+year_and_month_partitions = dg.StaticPartitionsDefinition(
+    [
+        f"{year}_{str(month).zfill(2)}"
+        for year in range(2024, 2026)
+        for month in range(1, 13)
+    ],
+)
+
+season_partitions = dg.StaticPartitionsDefinition(
+    ["winter", "spring", "summer", "autumn"],
+)
+
+year_and_season_partitions = dg.StaticPartitionsDefinition(
+    [
+        f"{year}_{season}"
+        for year in range(2024, 2026)
+        for season in ["winter", "spring", "summer", "autumn"]
+    ],
+)
 
 
 zone_partitions = dg.StaticPartitionsDefinition(
@@ -78,6 +98,7 @@ zone_partitions = dg.StaticPartitionsDefinition(
         "30.1.07",
         "31.1.01",
         "32.1.01",
+        "CRI+San José",
     ],
 )
 
